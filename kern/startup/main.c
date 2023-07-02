@@ -49,13 +49,12 @@
 #include <syscall.h>
 #include <test.h>
 #include <version.h>
-#include "autoconf.h"  // for pseudoconfig
-
+#include "autoconf.h" // for pseudoconfig
 
 /*
  * These two pieces of data are maintained by the makefiles and build system.
  * buildconfig is the name of the config file the kernel was configured with.
- * buildversion starts at 1 and is incremented every time you link a kernel. 
+ * buildversion starts at 1 and is incremented every time you link a kernel.
  *
  * The purpose is not to show off how many kernels you've linked, but
  * to make it easy to make sure that the kernel you just booted is the
@@ -68,15 +67,13 @@ extern const char buildconfig[];
  * Copyright message for the OS/161 base code.
  */
 static const char harvard_copyright[] =
-    "Copyright (c) 2000, 2001, 2002, 2003, 2004, 2005, 2008, 2009\n"
-    "   President and Fellows of Harvard College.  All rights reserved.\n";
-
+	"Copyright (c) 2000, 2001, 2002, 2003, 2004, 2005, 2008, 2009\n"
+	"   President and Fellows of Harvard College.  All rights reserved.\n";
 
 /*
  * Initial boot sequence.
  */
-static
-void
+static void
 boot(void)
 {
 	/*
@@ -101,8 +98,8 @@ boot(void)
 	kprintf("%s", harvard_copyright);
 	kprintf("\n");
 
-	kprintf("Put-your-group-name-here's system version %s (%s #%d)\n", 
-		GROUP_VERSION, buildconfig, buildversion);
+	kprintf("Parth Modi's system version %s (%s #%d)\n",
+			GROUP_VERSION, buildconfig, buildversion);
 	kprintf("\n");
 
 	/* Early initialization. */
@@ -129,7 +126,6 @@ boot(void)
 	/* Default bootfs - but ignore failure, in case emu0 doesn't exist */
 	vfs_setbootfs("emu0");
 
-
 	/*
 	 * Make sure various things aren't screwed up.
 	 */
@@ -140,13 +136,12 @@ boot(void)
 /*
  * Shutdown sequence. Opposite to boot().
  */
-static
-void
+static void
 shutdown(void)
 {
 
 	kprintf("Shutting down.\n");
-	
+
 	vfs_clearbootfs();
 	vfs_clearcurdir();
 	vfs_unmountall();
@@ -165,30 +160,31 @@ shutdown(void)
  * not because this is where system call code should go. Other syscall
  * code should probably live in the "syscall" directory.
  */
-int
-sys_reboot(int code)
+int sys_reboot(int code)
 {
-	switch (code) {
-	    case RB_REBOOT:
-	    case RB_HALT:
-	    case RB_POWEROFF:
+	switch (code)
+	{
+	case RB_REBOOT:
+	case RB_HALT:
+	case RB_POWEROFF:
 		break;
-	    default:
+	default:
 		return EINVAL;
 	}
 
 	shutdown();
 
-	switch (code) {
-	    case RB_HALT:
+	switch (code)
+	{
+	case RB_HALT:
 		kprintf("The system is halted.\n");
 		mainbus_halt();
 		break;
-	    case RB_REBOOT:
+	case RB_REBOOT:
 		kprintf("Rebooting...\n");
 		mainbus_reboot();
 		break;
-	    case RB_POWEROFF:
+	case RB_POWEROFF:
 		kprintf("The system is halted.\n");
 		mainbus_poweroff();
 		break;
@@ -202,8 +198,7 @@ sys_reboot(int code)
  * Kernel main. Boot up, then fork the menu thread; wait for a reboot
  * request, and then shut down.
  */
-void
-kmain(char *arguments)
+void kmain(char *arguments)
 {
 	boot();
 
