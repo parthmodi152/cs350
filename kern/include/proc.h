@@ -37,7 +37,9 @@
  */
 
 #include <spinlock.h>
+#include <synch.h>
 #include <thread.h> /* required for struct threadarray */
+#include "opt-A2.h"
 
 struct addrspace;
 struct vnode;
@@ -45,27 +47,46 @@ struct vnode;
 struct semaphore;
 #endif // UW
 
+// important info about process (addr of proc and error code if it exits)
+#if OPT_A2
+struct proc_info
+{
+	struct proc *proc_addr;
+	pid_t pid;
+	int exit_code;
+};
+#endif
+
 /*
  * Process structure.
  */
-struct proc {
-	char *p_name;			/* Name of this process */
-	struct spinlock p_lock;		/* Lock for this structure */
-	struct threadarray p_threads;	/* Threads in this process */
+struct proc
+{
+#if OPT_A2
+	pid_t pid;
+	struct array *children_info; // holds addresses to proc_info structs
+	struct cv *is_dying;
+	struct lock *child_lock; // many children could be modifying children_info array
+	struct proc *parent;
+	struct trapframe *tf;
+#endif
+	char *p_name;				  /* Name of this process */
+	struct spinlock p_lock;		  /* Lock for this structure */
+	struct threadarray p_threads; /* Threads in this process */
 
 	/* VM */
-	struct addrspace *p_addrspace;	/* virtual address space */
+	struct addrspace *p_addrspace; /* virtual address space */
 
 	/* VFS */
-	struct vnode *p_cwd;		/* current working directory */
+	struct vnode *p_cwd; /* current working directory */
 
 #ifdef UW
-  /* a vnode to refer to the console device */
-  /* this is a quick-and-dirty way to get console writes working */
-  /* you will probably need to change this when implementing file-related
-     system calls, since each process will need to keep track of all files
-     it has opened, not just the console. */
-  struct vnode *console;                /* a vnode for the console device */
+	/* a vnode to refer to the console device */
+	/* this is a quick-and-dirty way to get console writes working */
+	/* you will probably need to change this when implementing file-related
+	   system calls, since each process will need to keep track of all files
+	   it has opened, not just the console. */
+	struct vnode *console; /* a vnode for the console device */
 #endif
 
 	/* add more material here as needed */
@@ -100,5 +121,7 @@ struct addrspace *curproc_getas(void);
 /* Change the address space of the current process, and return the old one. */
 struct addrspace *curproc_setas(struct addrspace *);
 
+/* Set the address space of proc, return old one */
+struct addrspace *proc_setas(struct addrspace *newas, struct proc *proc);
 
 #endif /* _PROC_H_ */

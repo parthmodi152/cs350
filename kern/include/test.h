@@ -35,7 +35,6 @@
  * functions.
  */
 
-
 /* This is only actually available if OPT_SYNCHPROBS is set. */
 int whalemating(int, char **);
 
@@ -82,13 +81,16 @@ int mallocstress(int, char **);
 int nettest(int, char **);
 
 /* Routine for running a user-level program. */
+#if OPT_A2
+int runprogram(char *progname, int num_args, char **args);
+#else
 int runprogram(char *progname);
+#endif
 
 /* Kernel menu system. */
 void menu(char *argstr);
 
 /* The main function, called from start.S. */
 void kmain(char *bootstring);
-
 
 #endif /* _TEST_H_ */
